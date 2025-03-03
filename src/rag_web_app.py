@@ -1,59 +1,70 @@
 import streamlit as st
 import pandas as pd
+import uuid
 
 # Sidebar navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.selectbox("Choose a page", ["Chatbot", "File Upload", "About", "Settings"])
 
 if page == "Chatbot":
-    st.title("Multi-Session Chatbot")
+    st.title("myRAG Chatbot")
 
     # Initialize session state for chat sessions
     if "chats" not in st.session_state:
-        st.session_state.chats = {}  # Dictionary to hold multiple chats
+        st.session_state.chats = {}  # Store chats as {uuid: {"name": "Default", "messages": []}}
     if "active_chat" not in st.session_state:
-        st.session_state.active_chat = None  # Currently selected chat session
+        # Automatically create and set a default chat session
+        new_chat_id = str(uuid.uuid4())
+        st.session_state.chats[new_chat_id] = {"name": "Default", "messages": []}
+        st.session_state.active_chat = new_chat_id  # Track active chat by unique ID
 
-    # Create or select a chat session
+    # Sidebar for chat sessions
     st.sidebar.subheader("Chat Sessions")
-    chat_name = st.sidebar.text_input("Enter a new chat name:", placeholder="Chat 1")
-    
+
+    chat_name = st.sidebar.text_input("Enter a new chat name:", placeholder="Chat name")
+
     if st.sidebar.button("Create Chat") and chat_name:
-        if chat_name not in st.session_state.chats:
-            st.session_state.chats[chat_name] = []  # Initialize empty chat history
-            st.session_state.active_chat = chat_name  # Set new chat as active
-        else:
-            st.sidebar.warning("Chat name already exists!")
+        new_chat_id = str(uuid.uuid4())  # Generate unique ID for each chat
+        st.session_state.chats[new_chat_id] = {"name": chat_name, "messages": []}
+        st.session_state.active_chat = new_chat_id  # Set new chat as active
 
-    # List existing chats and allow switching
+    # Display existing chats and allow switching
     if st.session_state.chats:
-        selected_chat = st.sidebar.radio("Select a chat:", list(st.session_state.chats.keys()), key="chat_selector")
+        # Show chat names, but keep track of IDs
+        chat_options = {chat_id: st.session_state.chats[chat_id]["name"] for chat_id in st.session_state.chats}
+        
+        selected_chat_id = st.sidebar.radio("Select a chat:", list(chat_options.keys()), format_func=lambda x: chat_options[x])
 
-        if selected_chat:
-            st.session_state.active_chat = selected_chat
+        if selected_chat_id:
+            st.session_state.active_chat = selected_chat_id
 
-        # Add delete button for active chat
+        # Delete button for active chat
         if st.sidebar.button("Delete Chat") and st.session_state.active_chat:
             del st.session_state.chats[st.session_state.active_chat]
-            st.session_state.active_chat = None  # Reset active chat
-            st.rerun()  # Refresh the page to update sidebar
+            
+            # Automatically switch to another available chat or create a new one
+            if st.session_state.chats:
+                st.session_state.active_chat = next(iter(st.session_state.chats))  # Select first available chat
+            else:
+                # If all chats are deleted, create a new default chat
+                new_chat_id = str(uuid.uuid4())
+                st.session_state.chats[new_chat_id] = {"name": "Default", "messages": []}
+                st.session_state.active_chat = new_chat_id
 
-    if not st.session_state.active_chat:
-        st.write("Start a new chat from the sidebar.")
-    else:
-        st.subheader(f"Chat: {st.session_state.active_chat}")
+            st.rerun()  # Refresh UI
 
-        # Retrieve chat history for the active chat
-        chat_history = st.session_state.chats[st.session_state.active_chat]
+    # Retrieve active chat details
+    active_chat = st.session_state.chats.get(st.session_state.active_chat, None)
 
+    if active_chat:
         # Display previous messages
-        for message in chat_history:
+        for message in active_chat["messages"]:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
         # Get user input
         if prompt := st.chat_input("What is up?"):
-            chat_history.append({"role": "user", "content": prompt})
+            active_chat["messages"].append({"role": "user", "content": prompt})
 
             with st.chat_message("user"):
                 st.markdown(prompt)
@@ -63,11 +74,8 @@ if page == "Chatbot":
                 response = f"You said: {prompt}. I'm here to help!"
                 st.markdown(response)
 
-            chat_history.append({"role": "assistant", "content": response})
+            active_chat["messages"].append({"role": "assistant", "content": response})
 
-            # Debug: Print chat history
-            print(f"\n[DEBUG] Chat '{st.session_state.active_chat}' History:")
-            print(chat_history)
 
 elif page == "File Upload":
     st.title("Upload Multiple Documents for RAG")
