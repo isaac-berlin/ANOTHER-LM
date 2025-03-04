@@ -1,17 +1,15 @@
 import streamlit as st
-import pandas as pd
+import requests
+
+API_URL = "placeholder"
 
 def handle_uploaded_file(uploaded_file):
-    st.success(f"Uploaded: {uploaded_file.name}")
+    # send the file to the server via a POST request
+    files = {"file": uploaded_file.getvalue()}
+    response = requests.post(API_URL, files=files)
 
-    if uploaded_file.type == "text/plain":
-        text = uploaded_file.read().decode("utf-8")
-        st.text_area(f"Content of {uploaded_file.name}", text, height=150)
-
-    elif uploaded_file.type == "application/pdf":
-        st.write(f"PDF processing for {uploaded_file.name} coming soon!")
-
-    elif uploaded_file.type == "text/csv":
-        df = pd.read_csv(uploaded_file)
-        st.write(f"Preview of {uploaded_file.name}:")
-        st.dataframe(df)
+    # check if the request was successful
+    if response.status_code == 200:
+        st.success("File uploaded successfully!")
+    else:
+        st.error("Failed to upload file. Please try again.")
