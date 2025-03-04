@@ -14,5 +14,6 @@ uploaded_files = st.file_uploader("Upload multiple documents (PDF, TXT, CSV)",
                                     accept_multiple_files=True)
 
 if uploaded_files:
-    for uploaded_file in uploaded_files:
-        file_processing.handle_uploaded_file(uploaded_file)
+    with st.spinner("Processing..."):
+        for uploaded_file in uploaded_files:
+            file_processing.handle_uploaded_file(uploaded_file)
