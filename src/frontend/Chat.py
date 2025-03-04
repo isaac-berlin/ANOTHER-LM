@@ -1,5 +1,6 @@
 import streamlit as st
 from components import chat_session
+from time import sleep
 
 st.set_page_config(
     page_title="Chat",
@@ -37,6 +38,8 @@ if prompt := st.chat_input("What is up?"):
     response = f"You said: {prompt}. I'm here to help!"
 
     with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            sleep(1)
         st.markdown(response)
 
     active_chat["messages"].append({"role": "assistant", "content": response})
