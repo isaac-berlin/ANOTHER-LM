@@ -1,4 +1,6 @@
 import streamlit as st
+import requests
+import json
 from components import chat_session
 from time import sleep
 
@@ -8,6 +10,8 @@ st.set_page_config(
 )
 
 st.title("myRAG Chatbot")
+
+API_URL = "http://127.0.0.1:8000/query"  # Adjust if API runs on a different host/port
 
 # Initialize chat sessions
 chat_session.initialize_chat()
@@ -34,12 +38,21 @@ if prompt := st.chat_input("What is up?"):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Generate assistant response (Replace with actual RAG retrieval later)
-    response = f"You said: {prompt}. I'm here to help!"
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            sleep(1)
-        st.markdown(response)
+            try:
+                response = requests.post(API_URL, json={"question": prompt})
+                if response.status_code == 200:
+                    rag_response = response.json().get("response")
+                    source = response.json().get("sources")
+                else:
+                    rag_response = "Error: Failed to retrieve response."
+            except requests.exceptions.RequestException as e:
+                rag_response = f"API request failed: {str(e)}"
+                
+        st.markdown(rag_response)
+        if source:
+            st.markdown(f"Source: {source}")
 
-    active_chat["messages"].append({"role": "assistant", "content": response})
+    active_chat["messages"].append({"role": "assistant", "content": rag_response})

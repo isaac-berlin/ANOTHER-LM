@@ -2,9 +2,12 @@
 Advanced Neural Organizer for Textual Heuristic Enhanced Retrieval &amp; Language Modeling
 
 TODO
-- create streamlit webapp similar too https://docs.streamlit.io/develop/tutorials/chat-and-llm-apps/build-conversational-apps 
-- add documents
-- improve sped of generation (model quantization)
+- imporove logging
+- add docker support
+- organize api side code
+- MAKE SURE NO DUPLICATE DOCUMENTS ARE ADDED TO DATABASE
+- docstrings/comments/markdown
 
-extra
-- https://www.youtube.com/watch?v=u5Vcrwpzoz8
+extras
+- visualization of data page (graphs, nodes)
+- persistant chat history
