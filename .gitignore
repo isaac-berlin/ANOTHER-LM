@@ -170,5 +170,9 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+# Data files
 /Data
 /data
+
+# Huggingface models
+/Mistral-7B-Instruct-v0.2
