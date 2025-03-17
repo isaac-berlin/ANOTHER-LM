@@ -10,7 +10,6 @@ from langchain_chroma import Chroma
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from dotenv import load_dotenv
 from pathlib import Path
 import shutil
 import pymupdf
@@ -19,9 +18,12 @@ import pymupdf
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+print("Starting the RAG API...")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+
 # Load environment variables
-load_dotenv()
-CHROMADB_PATH = os.getenv("CHROMADB_PATH", "./chroma_db")
+CHROMADB_PATH = "./chroma_db"
 
 # Initialize FastAPI
 app = FastAPI(title="RAG API", description="A Retrieval-Augmented Generation API", version="1.0")
@@ -32,8 +34,7 @@ vectorstore = Chroma(persist_directory=CHROMADB_PATH, embedding_function=embeddi
 retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
 # Load LLM Model with Quantization
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+model_id = "Mistral-7B-Instruct-v0.2"
 
 quantization_config = BitsAndBytesConfig(load_in_4bit=True)
 model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=quantization_config)
