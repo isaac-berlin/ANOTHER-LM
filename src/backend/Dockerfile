@@ -4,8 +4,8 @@ FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
 # Set work directory
 WORKDIR /app
 
-# Manually install specific version of torch
-# RUN pip install torch==2.6.0 --extra-index-url https://download.pytorch.org/whl/cu118
+# Install system dependencies
+RUN apt-get update && apt-get install -y gcc git cmake && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for caching
 COPY requirements.txt .

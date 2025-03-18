@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  rag-app:
+    build: .
+    ports:
+      - "8000:8000"
+      - "8501:8501"
+    volumes:
+      - chroma-data:/app/chroma_db
+
+volumes:
+  chroma-data:

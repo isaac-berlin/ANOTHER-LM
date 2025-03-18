@@ -41,11 +41,12 @@ if prompt := st.chat_input("What is up?"):
 
 
     with st.chat_message("assistant"):
+        source = None
         with st.spinner("Thinking..."):
-            source = None
             try:
                 response = requests.post(API_URL, json={"question": prompt})
                 if response.status_code == 200:
+                    print(response.json())
                     rag_response = response.json().get("response")
                     source = response.json().get("sources")
                 else:
