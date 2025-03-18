@@ -2,8 +2,8 @@
 Advanced Neural Organizer for Textual Heuristic Enhanced Retrieval &amp; Language Modeling
 
 TODO
+- IMPORTANT: debug LLM generation of only --------- after a few/questions asked
 - imporove logging
-- add docker support
 - organize api side code
 - MAKE SURE NO DUPLICATE DOCUMENTS ARE ADDED TO DATABASE
 - docstrings/comments/markdown
