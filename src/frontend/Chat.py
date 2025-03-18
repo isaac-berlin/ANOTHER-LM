@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import json
 from components import chat_session
-from time import sleep
+import os
 
 st.set_page_config(
     page_title="Chat",
@@ -11,7 +11,8 @@ st.set_page_config(
 
 st.title("myRAG Chatbot")
 
-API_URL = "http://127.0.0.1:8000/query"  # Adjust if API runs on a different host/port
+url_base = os.getenv("API_URL", "http://localhost:8000")
+API_URL = f"{url_base}/query"
 
 # Initialize chat sessions
 chat_session.initialize_chat()
@@ -41,6 +42,7 @@ if prompt := st.chat_input("What is up?"):
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
+            source = None
             try:
                 response = requests.post(API_URL, json={"question": prompt})
                 if response.status_code == 200:

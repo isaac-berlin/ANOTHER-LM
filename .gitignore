@@ -175,5 +175,5 @@ cython_debug/
 /data
 
 # Huggingface 
-/src/backend/Mistral-7B-Instruct-v0.2
-/Mistral-7B-Instruct-v0.2
+/src/backend/Mistral-7B-Instruct-v0.3
+/Mistral-7B-Instruct-v0.3

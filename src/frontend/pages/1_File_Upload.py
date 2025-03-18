@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 from components import file_processing
 
 st.set_page_config(

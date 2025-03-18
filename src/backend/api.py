@@ -4,7 +4,7 @@ import logging
 import hashlib
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from pydantic import BaseModel
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from langchain_huggingface import HuggingFaceEmbeddings, HuggingFacePipeline
 from langchain_chroma import Chroma
 from langchain.chains import RetrievalQA
@@ -18,9 +18,8 @@ import pymupdf
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-print("Starting the RAG API...")
+# Set device for model loading
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
 
 # Load environment variables
 CHROMADB_PATH = "./chroma_db"
@@ -33,14 +32,20 @@ embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-Mi
 vectorstore = Chroma(persist_directory=CHROMADB_PATH, embedding_function=embedding_model)
 retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
-# Load LLM Model with Quantization
-model_id = "Mistral-7B-Instruct-v0.2"
+# Load Language Model
+model_id = "Mistral-7B-Instruct-v0.3"
+    
+# quantize model if CUDA is available (warning: model size large if not quantized)
+if device.type == "cuda":    
+    from transformers import BitsAndBytesConfig
+    quantization_config = BitsAndBytesConfig(load_in_4bit=True)
+    model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=quantization_config)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+else:
+    model = AutoModelForCausalLM.from_pretrained(model_id)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
 
-quantization_config = BitsAndBytesConfig(load_in_4bit=True)
-model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=quantization_config)
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-
-pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, return_full_text=False, pad_token_id=tokenizer.eos_token_id, max_new_tokens=512)
+pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, return_full_text=False, pad_token_id=tokenizer.eos_token_id, max_new_tokens=512, device=0 if device.type == "cuda" else -1)
 llm = HuggingFacePipeline(pipeline=pipe)
 
 # Define RAG Chain

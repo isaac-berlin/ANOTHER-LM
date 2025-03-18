@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY api.py .
 
 # copy the model/tokenizer
-COPY ./Mistral-7B-Instruct-v0.2 /app/Mistral-7B-Instruct-v0.2
+COPY ./Mistral-7B-Instruct-v0.3 /app/Mistral-7B-Instruct-v0.3
 
 # Expose API port
 EXPOSE 8000

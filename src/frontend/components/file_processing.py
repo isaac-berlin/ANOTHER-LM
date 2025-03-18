@@ -1,7 +1,9 @@
 import streamlit as st
 import requests
+import os
 
-API_URL = "http://localhost:8000/upload"
+url_base = os.getenv("API_URL", "http://localhost:8000")
+API_URL = f"{url_base}/upload"
 
 def handle_uploaded_files(uploaded_files):
     """Handles multiple file uploads and aborts if any fails."""
